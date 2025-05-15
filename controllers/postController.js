@@ -46,6 +46,43 @@ const show = (req, res) => {
 const store = (req, res) => {
   const { title, content, image, tags } = req.body;
 
+  let isRequestMalformed = false;
+  const malformedElements = [];
+
+  if (!title || typeof title !== "string" || title.length < 3) {
+    console.log("title is malformed");
+    malformedElements.push("name");
+    isRequestMalformed = true;
+  }
+
+  if (!content || typeof content !== "string" || content.length < 3) {
+    console.log("content is malformed");
+    malformedElements.push("content");
+    isRequestMalformed = true;
+  }
+
+  if (!image || typeof image !== "string" || image.length < 3) {
+    console.log("image is malformed");
+    malformedElements.push("image");
+    isRequestMalformed = true;
+  }
+
+  if (!Array.isArray(tags)) {
+    console.log("tags is malformed");
+    malformedElements.push("tags");
+    isRequestMalformed = true;
+  }
+
+  if (isRequestMalformed) {
+    res.status(400);
+
+    res.json({
+      error: "400 bad request",
+      message: "Request is malformed",
+      malformedElements,
+    });
+  }
+
   let maxId = 0;
   for (const post of posts) {
     if (post.id > maxId) maxId = post.id;
