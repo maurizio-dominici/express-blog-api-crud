@@ -44,7 +44,7 @@ const show = (req, res) => {
 };
 
 const store = (req, res) => {
-  res.json("Creazione di un nuovo post");
+  res.json(req.body);
 };
 
 const update = (req, res) => {
