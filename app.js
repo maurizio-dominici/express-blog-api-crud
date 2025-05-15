@@ -9,7 +9,7 @@ const appUrl = `http://localhost:` + appPort;
 
 // middelware
 app.use(express.static("public")); // static assets
-app.use(express.json()); // body parsers middleware
+app.use(express.json()); // body-parsers middleware
 
 // routers
 app.use("/posts", postRouter);
