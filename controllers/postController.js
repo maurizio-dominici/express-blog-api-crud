@@ -31,13 +31,9 @@ const show = (req, res) => {
   const post = posts.find((currentPost) => currentPost.id === id);
 
   if (!post) {
-    res.status(404);
-
-    return res.json({
-      error: "Not found",
-      status: 404,
-      message: "Post non trovato",
-    });
+    const error = new Error("post is not Found");
+    error.statusCode = 404;
+    throw error;
   }
 
   res.json(post);
@@ -77,13 +73,10 @@ const store = (req, res) => {
 
   // se il post è malformato blocco tutto con un errore 400
   if (isRequestMalformed) {
-    res.status(400);
-
-    res.json({
-      error: "400 bad request",
-      message: "Request is malformed",
-      malformedElements,
-    });
+    const error = new Error("post is malformed");
+    error.statusCode = 400;
+    error.data = malformedElements;
+    throw error;
   }
 
   // stabilisco l' id da prendere per creare il nuovo post
@@ -106,12 +99,9 @@ const update = (req, res) => {
 
   // mando l'errore se non ho il post
   if (!post) {
-    res.status(404);
-
-    return res.json({
-      error: "404 not found",
-      message: "post not found",
-    });
+    const error = new Error("post is not Found");
+    error.statusCode = 404;
+    throw error;
   }
 
   // salvo il nuovo post preso dal body
@@ -147,13 +137,10 @@ const update = (req, res) => {
 
   // se l'array è mal generato blocco tutto con un errore 400
   if (isRequestMalformed) {
-    res.status(400);
-
-    res.json({
-      error: "400 bad request",
-      message: "Request is malformed",
-      malformedElements,
-    });
+    const error = new Error("post is malformed");
+    error.statusCode = 400;
+    error.data = malformedElements;
+    throw error;
   }
 
   // se supera i controllli sostituisco il post
@@ -166,8 +153,34 @@ const update = (req, res) => {
 };
 
 const modify = (req, res) => {
-  const id = parseInt(req.params.id);
-  res.json(`Modifica parziale del post ${id}`);
+  const postId = parseInt(req.params.id);
+  const post = posts.find((currentPost) => currentPost.id === postId);
+
+  // Se il post non esiste, restituisci errore
+  if (!post) {
+    const error = new Error("post is not Found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Estrarre solo i campi inviati dal client
+  const { title, content, image, tags } = req.body;
+
+  // Aggiornare il post esistente SOLO con i dati ricevuti, mantenendo quelli esistenti
+  const updatedPost = {
+    ...post, // Mantiene i dati attuali
+    ...(title && { title }), // Aggiorna solo se presente
+    ...(content && { content }),
+    ...(image && { image }),
+    ...(tags && Array.isArray(tags) && { tags }), // Controllo su array valido
+  };
+
+  // Sostituire il post nella lista
+  const postIndex = posts.indexOf(post);
+  posts.splice(postIndex, 1, updatedPost);
+
+  // Restituisci il post aggiornato
+  res.json(updatedPost);
 };
 
 const destroy = (req, res) => {
@@ -175,13 +188,9 @@ const destroy = (req, res) => {
   const post = posts.find((currentPost) => currentPost.id === id);
 
   if (!post) {
-    res.status(404);
-
-    return res.json({
-      error: "Not found",
-      status: 404,
-      message: "Post non trovato",
-    });
+    const error = new Error("post is not Found");
+    error.statusCode = 404;
+    throw error;
   }
 
   posts.splice(posts.indexOf(post), 1);
